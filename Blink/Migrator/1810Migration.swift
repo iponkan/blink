@@ -32,6 +32,7 @@
 
 import Foundation
 import CoreData
+import Darwin
 
 
 class MigrationFileProviderReplicatedExtension: MigrationStep {
@@ -65,6 +66,9 @@ class MigrationFileProviderReplicatedExtension: MigrationStep {
   }
 
   private func deleteFileProviderStorage() {
+    // LiveContainer does not register the guest app's File Provider extension.
+    guard getenv("LC_HOME_PATH") == nil else { return }
+
     // Clean up the old File Provider path
     let fileProviderURL = NSFileProviderManager.default.documentStorageURL
 
