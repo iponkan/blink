@@ -1,0 +1,48 @@
+name: Build Blink IPA
+
+on:
+  push:
+    branches: [raw]
+    paths: [.github/workflows/ipa.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Prepare dependencies
+        run: |
+          ./get_frameworks.sh
+          ./get_resources.sh
+          cp template_setup.xcconfig developer_setup.xcconfig
+
+      - name: Archive Blink for iOS
+        run: |
+          xcodebuild archive \
+            -project Blink.xcodeproj \
+            -scheme Blink \
+            -configuration Debug \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$RUNNER_TEMP/Blink.xcarchive" \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
+
+      - name: Package unsigned IPA
+        working-directory: ${{ runner.temp }}
+        run: |
+          mkdir Payload
+          mv Blink.xcarchive/Products/Applications/Blink.app Payload/
+          lipo -verify_arch arm64 Payload/Blink.app/Blink
+          zip -qry --symlinks Blink.ipa Payload
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Blink-unsigned-ipa
+          path: ${{ runner.temp }}/Blink.ipa
+          if-no-files-found: error
