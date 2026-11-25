@@ -65,4 +65,5 @@ jobs:
         run: |
           gh release create "$RELEASE_TAG" Blink.ipa \
             --verify-tag --prerelease --latest=false \
-            --title "Blink ${RELEASE_TAG#v}" --notes-from-tag
+            --title "Blink ${RELEASE_TAG#v}" \
+            --notes 'Unsigned arm64 Debug IPA for LiveContainer.'
