@@ -38,7 +38,7 @@ jobs:
         run: |
           mkdir Payload
           mv Blink.xcarchive/Products/Applications/Blink.app Payload/
-          lipo -verify_arch arm64 Payload/Blink.app/Blink
+          lipo Payload/Blink.app/Blink -verify_arch arm64
           zip -qry Blink.ipa Payload
 
       - uses: actions/upload-artifact@v4
